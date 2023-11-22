@@ -1,0 +1,35 @@
+<?php session_start(); ?>
+<html >
+<head>
+<meta/>
+<title> Company assignment </title>
+<link href="css/style.css" rel="stylesheet" type="text/css" />
+<script LANGUAGE="JavaScript">
+    function confirmDelete( scriptId ) {
+  
+	var agree = confirm("Are you sure you want to delete?");
+      if ( agree ) {
+			 window.location.href = "delete_script.php?script_id="+scriptId;
+		
+      }
+    }
+
+  </script>
+ <script language="javascript" type="text/javascript" src="js/validation.js"></script>
+</head>
+	<body>
+		<?php
+
+			include ("classes/class_login.php");
+			include ("includes/db.php");
+			include ("classes/class_post.php");
+
+			$post = new post();
+
+			require_once("header.php");
+			require_once("content.php");
+			require_once("footer.php");
+
+		?>
+	</body>
+</html>

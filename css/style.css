@@ -1,0 +1,28 @@
+/*
+Design by Free CSS Templates
+*/
+.fixed-header{
+	font-size: 25px;
+}
+.fixed-header, .fixed-footer{
+	width: 100%;
+	background: #333;
+	padding: 10px 0;
+	color: #fff;
+}
+
+ .fixed-footer{
+	width: 100%;
+	position: fixed;        
+	background: #333;
+	padding: 10px 0;
+	color: #fff;
+}
+
+.fixed-footer{
+	bottom: 0;
+}  
+
+label.error{
+	color:red;
+}

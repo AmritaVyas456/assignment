@@ -1,0 +1,201 @@
+<?php
+class DatabaseClass {
+	var $_dbhostName;
+	var $_dbName;
+	var $_dbUser;
+	var $_dbPwd;
+	var $_dbCon;
+
+	function DatabaseClass (){
+
+	$this->_dbhostName="localhost";
+	$this->_dbName="assignmentd";
+	$this->_dbUser="root";
+	$this->_dbPwd="";
+	}
+
+	function dbOpen(){
+	$this->_dbCon=mysql_connect($this->_dbhostName,$this->_dbUser,$this->_dbPwd) or die ("Could not connect DB");
+	mysql_select_db($this->_dbName,$this->_dbCon) or die ("Could not select DatabaseClass");
+	}
+
+	function dbClose(){
+	mysql_close($this->_dbCon);
+	}
+
+	function getConn(){
+	return $this->_dbCon;
+	}
+}
+
+
+class SqlClass{
+	var $_dbSql;
+	var $_dbTotalRecord;
+	var $_dbFields=array();
+	var $_objDatabaseClass;
+	var $_dbNewID;		// This field will be used to get newly inserted id
+	var $_dbAffectedRows;
+
+	var $_dbErrMsg;
+	var $_dbErr;	// Boolean
+	var $_dbShowAdvanceError;	// Boolean
+
+	function SqlClass(){
+
+	$this->_dbSql="";
+	$this->_dbTotalRecord=NULL;
+	$this->_dbNewID=NULL;
+	$this->_dbAffectedRows=NULL;
+	$this->_dbErr=false;
+	$this->_dbShowAdvanceError=false;
+	$this->_dbErrMsg="";
+	}
+
+	function executeSql($sql,$doubtedFields=0){
+		if(strtoupper(substr($sql,0,6))=="SELECT"){
+		$Mode="Read";
+		}
+		else{
+		$Mode="Write";
+		}
+		$this->_objDatabaseClass=new DatabaseClass();
+		$this->_objDatabaseClass->dbOpen();
+		# To check Weather Doubted Fields are present or Not
+		if(is_array($doubtedFields) && $doubtedFields!=0){
+			for($i=0; $i<count($doubtedFields); $i++){
+				if(strpos($sql,'?')!==false){
+					$start=substr($sql,0,strpos($sql,'?'));
+					$end=substr($sql,strpos($sql,'?')+1);
+					$sql=$start.$this->sql_quote($doubtedFields[$i]).$end;
+				}
+
+			}
+		}//end Doubted Field Check
+		switch($Mode){
+		case "Read":
+
+			$row=array();
+
+			if($record=mysql_query($sql,$this->_objDatabaseClass->getConn())){
+				$this->_dbTotalRecord=mysql_num_rows($record);
+				if($this->_dbTotalRecord>0){
+				$fieldsname="";
+				for($i=0; $i<mysql_num_fields($record); $i++){
+					$fieldsname .= mysql_field_name($record,$i).",";
+					}
+				$rawData=array();
+					while($row=mysql_fetch_array($record))
+					{
+						foreach ($row as $fieldName => $fieldValue) {
+							$rawData["$fieldName"]=stripslashes($fieldValue);
+						}
+					$this->_dbFields[]=$rawData;
+					}
+				mysql_free_result($record);
+
+				#Reversing The Array Coz I need to Fetch Record below function Using POP built in function Function
+				$this->_dbFields = array_reverse($this->_dbFields, true);
+				return $this->_dbFields;
+				}
+				else{
+				$this->_dbErrMsg="<li>No Record Found</li>";
+				$this->_dbErr=true;
+				$this->_objDatabaseClass->dbClose();	// DisConnecting From DB
+				return true;
+				}
+			}
+			else{
+				if($this->_dbShowAdvanceError){
+					$this->_dbErrMsg='<br><b style="color:#FF0000">Your Query is</b> <br> '.$sql.' <br><b style="color:#FF0000"> Mysql Says</b><br>'.mysql_error();
+					}
+				else{
+					$this->_dbErrMsg="<li> A Problem Occur While Executing the Your Query</li>";
+					}
+				$this->_dbErr=true;
+				$this->_objDatabaseClass->dbClose();	// DisConnecting From DB
+				return false;
+
+			}
+		break;
+
+		case "Write":
+
+			if(mysql_query($sql,$this->_objDatabaseClass->getConn())){
+				$this->_dbNewID=mysql_insert_id($this->_objDatabaseClass->getConn());
+				$this->_dbAffectedRows=mysql_affected_rows($this->_objDatabaseClass->getConn());
+				$this->_dbErrMsg="Record Sucessfully Inserted";
+				$this->_dbErr=true;
+				$this->_objDatabaseClass->dbClose();	// DisConnecting From DB
+				return true;
+			}
+			else{
+				if($this->_dbShowAdvanceError){
+					$this->_dbErrMsg='<br><b style="color:#FF0000">Your Query is</b> <br> '.$sql.' <br><b style="color:#FF0000"> Mysql Says</b><br>'.mysql_error();
+					}
+				else{
+					$this->_dbErrMsg="<li> A Problem Occur While Executing the Your Query</li>";
+					}
+				$this->_dbErr=true;
+				$this->_objDatabaseClass->dbClose();	// DisConnecting From DB
+				return false;
+			}
+		break;
+
+		}
+	}
+
+
+	function fetchRow(&$dbRows){
+		if(is_array($dbRows)){
+			$returnValue = array_pop($dbRows);
+			if(!is_null($returnValue)){
+				return $returnValue;
+			}
+			else{
+				return false;
+			}
+		}
+		else{
+			$this->_dbErrMsg="0 Rows Found";
+			$this->_dbErr=true;
+		return false;
+		}
+
+	}
+
+	function isError(){
+	 return $this->_dbErr;
+	}
+	function getErrMsg(){
+	 return $this->_dbErrMsg;
+	}
+	function getNumRecord(){
+	 return $this->_dbTotalRecord;
+	}
+	function setAdvanceErr($value){
+	 $this->_dbShowAdvanceError=$value;
+	}
+	function getNewID(){
+	return $this->_dbNewID;
+	}
+	function getAffectedRows(){
+	return $this->_dbAffectedRows;
+	}
+
+	function  sql_quote($value){
+		if( get_magic_quotes_gpc() ){
+		  $value = stripslashes($value);
+		}
+		//check if this function exists
+		if( function_exists( "mysql_real_escape_string" ) ){
+		  $value = mysql_real_escape_string($value);
+		}
+		//for PHP version < 4.3.0 use addslashes
+		else {
+		  $value = addslashes($value);
+		}
+	return $value;
+	}
+}// SqlClass
+?>

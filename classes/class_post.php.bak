@@ -1,0 +1,82 @@
+<?php
+class post
+{
+
+	// Can use member and cnstructr if required.
+
+	function showAllPosts()
+	{
+		
+		$userId = $_SESSION['user_id'];
+		
+		$template='
+		<table border="0" width="98%" rowspan="0" colspan="0">
+							<tr>
+								<td>	
+									<a href="#" style="font-size:20px; font-style:italic; "> User Posts </a>
+								</td>
+								<td align="right" >
+									<a href="#" style="text-decoration:none; padding-right:2px; padding-left:4px; font-size:15px; color:#C752C7;">
+										Create Post
+									</a>
+								</td>
+
+							</tr>
+		</table>';
+
+
+			$getPostsSQL = "select * from posts WHERE user_id=$userId order by id DESC";
+  
+			$objSql = new SqlClass();
+			$objSql->setAdvanceErr( true );
+			$getUserPosts = $objSql->executeSql( $getPostsSQL );
+			$postCount = $objSql->getNumRecord( $getUserPosts );
+
+            if( $postCount > 0 ) {
+				$template.='<table border="0" width="98%" rowspan="0" colspan="0" align="center" style="margin-top:10px;">
+								<tr class="table_header" style="background-color:#B93B8F;">
+									<td align="center"  style="color:white;" width="20%">
+										Titile
+									</td>
+									<td style="color:#FFF;"  width="20%" align="center" >
+										Descriptin
+									</td>	
+									<td style="color:#FFF;" width="40%" style="padding-left:20px;" align="center">
+										Date
+									</td>
+									
+									<td style="color:#FFF;" width="20%" align="center">
+										Action
+									</td>
+									
+								</tr>
+							</table>
+							<div style="height:150px; overflow:auto;">
+						<table  border="0" width="98%" rowspan="0" colspan="0" align="center">';
+			$i=0;			
+			while( $rowValue = $objSql->fetchRow( $getUserPosts ) )
+			{
+	
+					$template.='<tr>';
+					$template.='<td align="center"  width="20%"> '.$rowValue["title"].'</td>
+					<td align="center"  width="40%">'.$rowValue["description"].'</td>
+					<td align="center"  width="20%" >'.$rowValue["date"].'</td>	
+					<td width="20%"  align="center">Edit | Delete</a></td>	
+					</tr>';
+				
+			}	
+			$template.='</table></div>';
+
+		}	
+		else
+		{
+			
+			 echo "No any record found.";
+			
+		}
+		return $template;
+	}
+
+
+
+}?>
