@@ -50,7 +50,7 @@ class login
 
 	function checkLogin() // Lastest php version we can use strict return type here
 	{
-		echo md5($this->strUserPassword); die;
+		
             $validUserCheckSql = "select * from users where user_name= '".$this->strUserName."' and user_password ='".md5($this->strUserPassword)."'";
 			$objSql = new SqlClass();
 			$objSql->setAdvanceErr( true );
