@@ -23,9 +23,6 @@
 								$template = $login->loginForm( $getError );
 								echo $template;
 							}
-	            if (isset($_GET['error']))
-              {
-                echo "<span style='color:red;font-size:20px;'>Login name or password is not valid.</span>";                              
-              }
+	          
   ?>
                 
