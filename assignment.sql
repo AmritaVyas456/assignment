@@ -55,7 +55,7 @@ INSERT INTO `posts` (`id`, `title`, `description`, `date`, `user_id`) VALUES
 CREATE TABLE `users` (
   `id` int(11) NOT NULL COMMENT 'primary_key',
   `user_name` varchar(24) NOT NULL,
-  `user_password` varchar(24) NOT NULL,
+  `user_password` varchar(111) NOT NULL,
   `name` varchar(55) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -64,7 +64,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `user_name`, `user_password`, `name`) VALUES
-(1, 'amrita', 'amrita123', 'Amrita Vyas');
+(1, 'amrita', '2967eaad1dd3cf4ff792b31e26d5216a', 'Amrita Vyas');
 
 --
 -- Indexes for dumped tables
